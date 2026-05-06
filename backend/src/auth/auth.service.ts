@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { CredentialsInputDto } from './dto/auth-dto';
 import { Role } from 'generated/prisma';
@@ -46,12 +46,17 @@ export class AuthService {
 
     async register(reg: RegisterDto) {
         const hashedPassword = await bcrypt.hash(reg.password, 10);
+        const checkEmail = await this.usersService.findByEmail(reg.email)
 
+        if (checkEmail) {
+            throw new ConflictException("The email you entered already exists.")
+        }
         return this.usersService.create({
             ...reg,
             password: hashedPassword,
             role: 'USER'
         });
     }
+
 }
 
