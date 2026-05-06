@@ -7,7 +7,7 @@ export class RolesGuard implements CanActivate {
     constructor(private reflector: Reflector) { }
 
     canActivate(context: ExecutionContext): boolean {
-        const requiredRoles = this.reflector.get<Role[]>('roles', context.getHandler());
+        const requiredRoles = this.reflector.get<Role[]>(process.env.ROLES_KEY, context.getHandler());
 
         // If no roles specified, allow everyone (JwtAuthGuard handles auth)
         if (!requiredRoles) {

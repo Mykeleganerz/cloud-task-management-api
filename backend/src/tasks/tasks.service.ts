@@ -1,50 +1,62 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { DatabaseService } from 'src/database/database.service';
-import { Priority, Status } from 'generated/prisma';
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly databaseService: DatabaseService) { }
+  constructor(private databaseService: DatabaseService) { }
 
-  async create(createTaskDto: CreateTaskDto) {
+  async create(userId: string, createTaskDto: CreateTaskDto) {
     return this.databaseService.task.create({
-      data: createTaskDto
-    });
+      data: {
+        ...createTaskDto,
+        userId: userId
+      }
+    })
   }
 
-  async findAll(prio?: Priority, status?: Status) {
+  async findAll(userId: string) {
     return this.databaseService.task.findMany({
       where: {
-        priority: prio,
-        status: status
+        userId: userId
       }
     });
   }
 
-  async findOne(id: number) {
-    return this.databaseService.task.findUnique({
+  async findOne(userId: string, id: number) {
+    const findTask = await this.databaseService.task.findFirst({
+      where: {
+        id: id,
+        userId: userId
+      }
+    })
+
+    if (!findTask) {
+      throw new NotFoundException("Task in this User is not found.")
+    }
+    return findTask;
+  }
+
+  async update(userId: string, id: number, updateTaskDto: UpdateTaskDto) {
+    await this.findOne(userId, id)
+
+    return this.databaseService.task.update({
+      where: {
+        id: id
+      },
+      data: {
+        ...updateTaskDto
+      }
+    })
+  }
+
+  async remove(userId: string, id: number) {
+    await this.findOne(userId, id)
+    return this.databaseService.task.delete({
       where: {
         id: id
       }
-    });
-  }
-
-  async update(id: number, updateTaskDto: UpdateTaskDto) {
-    return this.databaseService.task.update({
-      where: {
-        id,
-      },
-      data: updateTaskDto
-    });
-  }
-
-  async remove(id: number) {
-    return this.databaseService.task.delete({
-      where: {
-        id,
-      }
-    });
+    })
   }
 }
