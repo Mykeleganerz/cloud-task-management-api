@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { DatabaseService } from 'src/database/database.service';
+import { Priority, Status } from 'generated/prisma/client';
+import { contains } from 'class-validator';
 
 @Injectable()
 export class TasksService {
@@ -16,12 +18,96 @@ export class TasksService {
     })
   }
 
-  async findAll(userId: string) {
-    return this.databaseService.task.findMany({
-      where: {
-        userId: userId
-      }
-    });
+  async findAll(userId: string, priority?: string, status?: string, search?: string, skip: number = 0, take: number = 10) {
+    if (search) {
+      const [tasks, total] = await Promise.all([
+        this.databaseService.task.findMany({
+          where: {
+            userId: userId,
+            title: {
+              contains: search, mode: 'insensitive'
+            }
+          },
+          skip,
+          take
+        }),
+        this.databaseService.task.count({
+          where: {
+            userId: userId,
+            title: {
+              contains: search, mode: 'insensitive'
+            }
+          }
+        })
+      ]);
+      return {
+        data: tasks,
+        pagination: { total, skip, take, pages: Math.ceil(total / take) }
+      };
+    }
+
+    if (priority) {
+      const [tasks, total] = await Promise.all([
+        this.databaseService.task.findMany({
+          where: {
+            userId: userId,
+            priority: priority as Priority
+          },
+          skip,
+          take
+        }),
+        this.databaseService.task.count({
+          where: {
+            userId: userId,
+            priority: priority as Priority
+          }
+        })
+      ]);
+      return {
+        data: tasks,
+        pagination: { total, skip, take, pages: Math.ceil(total / take) }
+      };
+    }
+    else if (status) {
+      const [tasks, total] = await Promise.all([
+        this.databaseService.task.findMany({
+          where: {
+            userId: userId,
+            status: status as Status
+          },
+          skip,
+          take
+        }),
+        this.databaseService.task.count({
+          where: {
+            userId: userId,
+            status: status as Status
+          }
+        })
+      ]);
+      return {
+        data: tasks,
+        pagination: { total, skip, take, pages: Math.ceil(total / take) }
+      };
+    }
+    const [tasks, total] = await Promise.all([
+      this.databaseService.task.findMany({
+        where: {
+          userId: userId
+        },
+        skip,
+        take
+      }),
+      this.databaseService.task.count({
+        where: {
+          userId: userId
+        }
+      })
+    ]);
+    return {
+      data: tasks,
+      pagination: { total, skip, take, pages: Math.ceil(total / take) }
+    };
   }
 
   async findOne(userId: string, id: number) {

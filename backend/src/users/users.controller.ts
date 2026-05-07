@@ -20,8 +20,8 @@ export class UsersController {
 
   @Get()
   @Roles(Role.ADMIN)
-  findAll(@Query('role') role?: 'USER' | 'ADMIN') {
-    return this.usersService.findAll(role);
+  findAll(@Query('role') role?: 'USER' | 'ADMIN', @Query('search') search?: string, @Query('skip') skip?: string, @Query('take') take?: string) {
+    return this.usersService.findAll(role, search, skip ? parseInt(skip) : 0, take ? parseInt(take) : 10);
   }
 
   @Get(':id')

@@ -4,9 +4,6 @@ import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Injectable()
 export class UsersService {
@@ -25,13 +22,65 @@ export class UsersService {
     });
   }
 
-  async findAll(role?: Role) {
-    if (role) return this.databaseService.user.findMany({
-      where: {
-        role: role
-      }
-    });
-    return this.databaseService.user.findMany();
+  async findAll(role?: Role, search?: string, skip: number = 0, take: number = 10) {
+    if (search) {
+      const [users, total] = await Promise.all([
+        this.databaseService.user.findMany({
+          where: {
+            email: {
+              contains: search,
+              mode: 'insensitive'
+            }
+          },
+          skip,
+          take
+        }),
+        this.databaseService.user.count({
+          where: {
+            email: {
+              contains: search,
+              mode: 'insensitive'
+            }
+          }
+        })
+      ]);
+      return {
+        data: users,
+        pagination: { total, skip, take, pages: Math.ceil(total / take) }
+      };
+    }
+
+    else if (role) {
+      const [users, total] = await Promise.all([
+        this.databaseService.user.findMany({
+          where: {
+            role: role
+          },
+          skip,
+          take
+        }),
+        this.databaseService.user.count({
+          where: {
+            role: role
+          }
+        })
+      ]);
+      return {
+        data: users,
+        pagination: { total, skip, take, pages: Math.ceil(total / take) }
+      };
+    }
+    const [users, total] = await Promise.all([
+      this.databaseService.user.findMany({
+        skip,
+        take
+      }),
+      this.databaseService.user.count({})
+    ]);
+    return {
+      data: users,
+      pagination: { total, skip, take, pages: Math.ceil(total / take) }
+    };
   }
 
   async findOne(id: string) {
