@@ -1,24 +1,36 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { Priority, Status } from 'generated/prisma/client';
-import { contains } from 'class-validator';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 export class TasksService {
-  constructor(private databaseService: DatabaseService) { }
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache, private databaseService: DatabaseService) { }
 
   async create(userId: string, createTaskDto: CreateTaskDto) {
-    return this.databaseService.task.create({
+    const task = await this.databaseService.task.create({
       data: {
         ...createTaskDto,
         userId: userId
       }
     })
+    await this.invalidateTaskCache()
+    return task;
   }
 
   async findAll(userId: string, priority?: string, status?: string, search?: string, skip: number = 0, take: number = 10) {
+    const cacheKey = `tasks:findAll:${userId}:${priority}:${status}:${search}:${skip}:${take}`
+
+    const cached = await this.cacheManager.get(cacheKey)
+
+    if (cached) {
+      return cached
+    }
+
+    let allData;
+
     if (search) {
       const [tasks, total] = await Promise.all([
         this.databaseService.task.findMany({
@@ -40,13 +52,11 @@ export class TasksService {
           }
         })
       ]);
-      return {
+      allData = {
         data: tasks,
         pagination: { total, skip, take, pages: Math.ceil(total / take) }
-      };
-    }
-
-    if (priority) {
+      }
+    } else if (priority) {
       const [tasks, total] = await Promise.all([
         this.databaseService.task.findMany({
           where: {
@@ -63,10 +73,10 @@ export class TasksService {
           }
         })
       ]);
-      return {
+      allData = {
         data: tasks,
         pagination: { total, skip, take, pages: Math.ceil(total / take) }
-      };
+      }
     }
     else if (status) {
       const [tasks, total] = await Promise.all([
@@ -85,32 +95,45 @@ export class TasksService {
           }
         })
       ]);
-      return {
+      allData = {
+        data: tasks,
+        pagination: { total, skip, take, pages: Math.ceil(total / take) }
+      }
+    } else {
+      const [tasks, total] = await Promise.all([
+        this.databaseService.task.findMany({
+          where: {
+            userId: userId
+          },
+          skip,
+          take
+        }),
+        this.databaseService.task.count({
+          where: {
+            userId: userId
+          }
+        })
+      ]);
+      allData = {
         data: tasks,
         pagination: { total, skip, take, pages: Math.ceil(total / take) }
       };
     }
-    const [tasks, total] = await Promise.all([
-      this.databaseService.task.findMany({
-        where: {
-          userId: userId
-        },
-        skip,
-        take
-      }),
-      this.databaseService.task.count({
-        where: {
-          userId: userId
-        }
-      })
-    ]);
-    return {
-      data: tasks,
-      pagination: { total, skip, take, pages: Math.ceil(total / take) }
-    };
+
+    await this.cacheManager.set(cacheKey, allData)
+
+    return allData;
   }
 
   async findOne(userId: string, id: number) {
+    const cacheKey = `tasks:findOne:${userId}:${id}`
+
+    const cached = await this.cacheManager.get(cacheKey)
+
+    if (cached) {
+      return cached
+    }
+
     const findTask = await this.databaseService.task.findFirst({
       where: {
         id: id,
@@ -121,13 +144,15 @@ export class TasksService {
     if (!findTask) {
       throw new NotFoundException("Task in this User is not found.")
     }
+
+    await this.cacheManager.set(cacheKey, findTask)
     return findTask;
   }
 
   async update(userId: string, id: number, updateTaskDto: UpdateTaskDto) {
     await this.findOne(userId, id)
 
-    return this.databaseService.task.update({
+    const updated = await this.databaseService.task.update({
       where: {
         id: id
       },
@@ -135,14 +160,26 @@ export class TasksService {
         ...updateTaskDto
       }
     })
+
+    await this.cacheManager.del(`tasks:findOne:${userId}:${id}`)
+    await this.invalidateTaskCache()
+    return updated;
   }
 
   async remove(userId: string, id: number) {
     await this.findOne(userId, id)
-    return this.databaseService.task.delete({
+    const removed = await this.databaseService.task.delete({
       where: {
         id: id
       }
     })
+
+    await this.cacheManager.del(`tasks:findOne:${userId}:${id}`)
+    await this.invalidateTaskCache()
+    return removed;
+  }
+
+  private async invalidateTaskCache() {
+    await this.cacheManager.del('tasks:findAll');
   }
 }
