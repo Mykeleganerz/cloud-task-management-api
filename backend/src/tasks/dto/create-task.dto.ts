@@ -1,5 +1,5 @@
 import { IsDate, IsNotEmpty, IsOptional, IsString } from "class-validator"
-import { Priority, Status } from "generated/prisma"
+import { Priority, Status } from "generated/prisma/client"
 
 export class CreateTaskDto {
 

@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { Priority, Status } from 'generated/prisma/client';
 
 @Controller('tasks')
 @UseGuards(JwtAuthGuard)
@@ -15,8 +16,8 @@ export class TasksController {
   }
 
   @Get()
-  findAll(@Req() req) {
-    return this.tasksService.findAll(req.user.id);
+  findAll(@Req() req, @Query('priority') priority?: string, @Query('status') status?: string, @Query('search') search?: string, @Query('skip') skip?: string, @Query('take') take?: string) {
+    return this.tasksService.findAll(req.user.id, priority as Priority, status as Status, search, skip ? parseInt(skip) : 0, take ? parseInt(take) : 10);
   }
 
   @Get(':id')
