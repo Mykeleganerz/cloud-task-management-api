@@ -4,15 +4,37 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { Priority, Status } from 'generated/prisma/client';
+import { TaskRemindersService } from 'src/task-reminders/task-reminders.service';
 
 @Controller('tasks')
 @UseGuards(JwtAuthGuard)
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) { }
+  constructor(private readonly tasksService: TasksService, private readonly taskReminderService: TaskRemindersService) { }
 
   @Post()
-  create(@Req() req, @Body() createTaskDto: CreateTaskDto) {
-    return this.tasksService.create(req.user.id, createTaskDto);
+  async create(@Req() req, @Body() createTaskDto: CreateTaskDto) {
+    // 1. Create task first
+    const task = await this.tasksService.create(req.user.id, createTaskDto);
+
+    // 2. Queue reminder job if dueDate is provided
+    if (createTaskDto.dueDate) {
+      try {
+        const jobId = await this.taskReminderService.remindTask(
+          task.id,
+          task.title,
+          createTaskDto.dueDate,
+          req.user.id
+        );
+        return { ...task, reminderJobId: jobId };
+      } catch (error: unknown) {
+        // Task is created but reminder failed - log but don't fail the request
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Failed to queue reminder:', message);
+        return task;
+      }
+    }
+
+    return task;
   }
 
   @Get()
@@ -26,8 +48,28 @@ export class TasksController {
   }
 
   @Patch(':id')
-  update(@Req() req, @Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.tasksService.update(req.user.id, +id, updateTaskDto);
+  async update(@Req() req, @Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {
+    // Update task
+    const task = await this.tasksService.update(req.user.id, +id, updateTaskDto);
+
+    // Queue reminder if dueDate was updated
+    if (updateTaskDto.dueDate) {
+      try {
+        const jobId = await this.taskReminderService.remindTask(
+          task.id,
+          task.title,
+          updateTaskDto.dueDate,
+          req.user.id
+        );
+        return { ...task, reminderJobId: jobId };
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Failed to queue reminder:', message);
+        return task;
+      }
+    }
+
+    return task;
   }
 
   @Delete(':id')

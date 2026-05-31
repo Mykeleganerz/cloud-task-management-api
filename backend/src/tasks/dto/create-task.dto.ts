@@ -1,4 +1,5 @@
 import { IsDate, IsNotEmpty, IsOptional, IsString } from "class-validator"
+import { Type } from "class-transformer"
 import { Priority, Status } from "generated/prisma/client"
 
 export class CreateTaskDto {
@@ -17,5 +18,6 @@ export class CreateTaskDto {
 
     @IsOptional()
     @IsDate()
+    @Type(() => Date)
     dueDate?: Date
 }

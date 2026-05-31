@@ -9,15 +9,17 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String?
-  role      Role     @default(USER) // Enum for RBAC
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tasks     Task[]   // Relationship: One user can have many tasks
-  @@map("users")  // Maps model to "users" table in Postgres
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  name          String?
+  role          Role           @default(USER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  tasks         Task[]
+  notifications Notification[]
+
+  @@map("users")
 }
 
 model Task {
@@ -35,6 +37,20 @@ model Task {
   author      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("tasks")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  taskId    Int
+  title     String
+  dueDate   DateTime
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }
 
 enum Role {
