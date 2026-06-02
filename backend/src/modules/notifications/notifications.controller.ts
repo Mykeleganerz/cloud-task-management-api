@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { SendReminderDto } from './dto/send-reminder.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
 
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)

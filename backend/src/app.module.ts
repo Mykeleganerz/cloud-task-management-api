@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
+import { UsersModule } from './modules/users/users.module';
 import { DatabaseModule } from './database/database.module';
-import { AuthModule } from './auth/auth.module';
-import { TasksModule } from './tasks/tasks.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import KeyvRedis from '@keyv/redis';
 import { BullModule } from '@nestjs/bullmq';
-import { TaskRemindersModule } from './task-reminders/task-reminders.module';
-import { NotificationsModule } from './notifications/notifications.module';
+import { TaskRemindersModule } from './modules/task-reminders/task-reminders.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [

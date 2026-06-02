@@ -1,0 +1,9 @@
+export { AuthModule } from './auth.module';
+export { AuthService } from './auth.service';
+export { AuthController } from './auth.controller';
+export { JwtAuthGuard } from './guards/jwt.guard';
+export { RolesGuard } from './guards/roles.guard';
+export { Roles } from './decorators/roles.decorator';
+export { JwtStrategy } from './strategies/jwt.strategy';
+export { CredentialsInputDto } from './dto/auth-dto';
+export { RegisterDto } from './dto/register-dto';

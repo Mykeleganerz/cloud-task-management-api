@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
 
 @Processor('task-reminders')
 export class TaskRemindersProcessor extends WorkerHost {
