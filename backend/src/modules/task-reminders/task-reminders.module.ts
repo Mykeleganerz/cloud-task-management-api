@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TaskRemindersService } from './task-reminders.service';
 import { TaskRemindersProcessor } from './processors/task-reminders.processor';
 import { BullModule } from '@nestjs/bullmq';
-import { NotificationsModule } from 'src/notifications/notifications.module';
+import { NotificationsModule } from 'src/modules/notifications/notifications.module';
 
 @Module({
     imports: [
