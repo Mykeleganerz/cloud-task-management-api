@@ -19,7 +19,7 @@ export class TaskRemindersService {
                 {
                     attempts: 3,
                     removeOnComplete: true,
-                    delay: Math.max(delayMs - (5 * 60 * 1000), 0)  // Schedule for due date, 5 mins before due date
+                    delay: Math.max(delayMs - (60 * 60 * 1000), 0)  // Schedule for due date, 1 hour before due date
                 }
             );
 
