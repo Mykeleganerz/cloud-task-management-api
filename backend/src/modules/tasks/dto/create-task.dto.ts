@@ -1,5 +1,5 @@
-import { IsDate, IsNotEmpty, IsOptional, IsString } from "class-validator"
 import { Type } from "class-transformer"
+import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator"
 import { Priority, Status } from "generated/prisma/client"
 
 export class CreateTaskDto {
@@ -12,8 +12,10 @@ export class CreateTaskDto {
     @IsString()
     description?: string
 
+    @IsEnum(Status)
     status!: Status
 
+    @IsEnum(Priority)
     priority!: Priority
 
     @IsOptional()

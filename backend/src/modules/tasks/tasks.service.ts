@@ -4,10 +4,11 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { Priority, Status } from 'generated/prisma/client';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { TaskRemindersService } from '../task-reminders/task-reminders.service';
 
 @Injectable()
 export class TasksService {
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache, private databaseService: DatabaseService) { }
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache, private databaseService: DatabaseService, private taskReminderService: TaskRemindersService) { }
 
   async create(userId: string, createTaskDto: CreateTaskDto) {
     const task = await this.databaseService.task.create({
@@ -15,9 +16,26 @@ export class TasksService {
         ...createTaskDto,
         userId: userId
       }
-    })
-    await this.invalidateTaskCache()
-    return task;
+    });
+
+    let reminderJobId: string | undefined;
+
+    if (createTaskDto.dueDate) {
+      try {
+        reminderJobId = await this.taskReminderService.remindTask(
+          task.id,
+          task.title,
+          createTaskDto.dueDate,
+          userId
+        );
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Failed to queue reminder:', message);
+      }
+    }
+
+    await this.invalidateTaskCache();
+    return { ...task, ...(reminderJobId && { reminderJobId }) };
   }
 
   async findAll(userId: string, priority?: string, status?: string, search?: string, skip: number = 0, take: number = 10) {
@@ -161,9 +179,26 @@ export class TasksService {
       }
     })
 
+    let reminderJobId: string | undefined;
+
+    // Queue reminder if dueDate was updated
+    if (updateTaskDto.dueDate) {
+      try {
+        reminderJobId = await this.taskReminderService.remindTask(
+          updated.id,
+          updated.title,
+          updateTaskDto.dueDate,
+          userId
+        );
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Failed to queue reminder:', message);
+      }
+    }
+
     await this.cacheManager.del(`tasks:findOne:${userId}:${id}`)
     await this.invalidateTaskCache()
-    return updated;
+    return { ...updated, ...(reminderJobId && { reminderJobId }) };
   }
 
   async remove(userId: string, id: number) {
