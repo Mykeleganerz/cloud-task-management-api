@@ -1,7 +1,23 @@
 services:
+  server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cloud-task-management-api-server
+    restart: always
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./backend/.env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
   redis:
     image: redis:alpine
-    container_name: redis-cache-taskmanager
+    container_name: cloud-task-management-api-redis
     restart: always
     ports:
       - '6379:6379'
