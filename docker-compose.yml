@@ -6,7 +6,7 @@ services:
     container_name: cloud-task-management-api-server
     restart: always
     ports:
-      - '3000:3000'
+      - '${PORT:-3000}:3000'
     env_file:
       - ./backend/.env
     environment:
