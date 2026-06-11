@@ -10,6 +10,7 @@ import KeyvRedis from '@keyv/redis';
 import { BullModule } from '@nestjs/bullmq';
 import { TaskRemindersModule } from './modules/task-reminders/task-reminders.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { WelcomeEmailModule } from './modules/welcome-email/welcome-email.module';
 
 @Module({
   imports: [
@@ -17,6 +18,9 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     DatabaseModule,
     AuthModule,
     TasksModule,
+    TaskRemindersModule,
+    NotificationsModule,
+    WelcomeEmailModule,
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: () => ({
@@ -33,8 +37,8 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
       },
       defaultJobOptions: { attempts: 3 }
     }),
-    TaskRemindersModule,
-    NotificationsModule,
+
+
   ],
   controllers: [AppController],
   providers: [AppService],
