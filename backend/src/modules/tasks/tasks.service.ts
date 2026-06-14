@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { DatabaseService } from 'src/database/database.service';
-import { Priority, Status } from 'generated/prisma/client';
+import { Priority, Status } from '@prisma/client';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { TaskRemindersService } from '../task-reminders/task-reminders.service';
 

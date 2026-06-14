@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req, Delete, HttpCode } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { SendReminderDto } from './dto/send-reminder.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
@@ -21,5 +21,11 @@ export class NotificationsController {
     @Patch(':id/read')
     async markAsRead(@Param('id') id: number) {
         return await this.notificationsService.markAsRead(+id);
+    }
+
+    @Delete(':id')
+    @HttpCode(204)
+    async deleteNotification(@Param('id') id: number) {
+        await this.notificationsService.deleteNotification(+id);
     }
 }

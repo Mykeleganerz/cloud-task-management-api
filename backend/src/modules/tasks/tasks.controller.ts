@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query, HttpCode } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
-import { Priority, Status } from 'generated/prisma/client';
+import { Priority, Status } from '@prisma/client';
 import { TaskRemindersService } from 'src/modules/task-reminders/task-reminders.service';
 
 @Controller('tasks')
@@ -32,6 +32,7 @@ export class TasksController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   remove(@Req() req, @Param('id') id: string) {
     return this.tasksService.remove(req.user.id, +id);
   }

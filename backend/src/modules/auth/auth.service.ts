@@ -1,10 +1,11 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { UsersService } from 'src/modules/users/users.service';
 import { CredentialsInputDto } from './dto/auth-dto';
-import { Role } from 'generated/prisma';
+import { Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register-dto';
+import { WelcomeEmailService } from '../welcome-email/welcome-email.service';
 
 type loginPayload = {
     id: string,
@@ -15,7 +16,9 @@ type loginPayload = {
 
 @Injectable()
 export class AuthService {
-    constructor(private usersService: UsersService, private jwtService: JwtService) { }
+    private readonly logger = new Logger(AuthService.name);
+
+    constructor(private usersService: UsersService, private jwtService: JwtService, private welcomeEmailService: WelcomeEmailService) { }
 
     async login(credentials: CredentialsInputDto): Promise<loginPayload | null> {
         const user = await this.usersService.findByEmail(credentials.email)
@@ -51,11 +54,22 @@ export class AuthService {
         if (checkEmail) {
             throw new ConflictException("The email you entered already exists.")
         }
-        return this.usersService.create({
+        const newUser = await this.usersService.create({
             ...reg,
             password: hashedPassword,
             role: 'USER'
         });
+
+        let welcomeEmailJob;
+        try {
+            welcomeEmailJob = await this.welcomeEmailService.welcomeEmail(reg.name, reg.email);
+            this.logger.log(`New user ${reg.name} welcome email job initalized.`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to initialized welcome email job to the new user ${reg.name}.`, error);
+        }
+
+        return { ...newUser, welcomeEmailJob };
     }
 
 }

@@ -1,6 +1,6 @@
 # Cloud Task Management API
 
-A NestJS-based REST API for managing users and tasks with role-based access control, JWT authentication, and Redis caching.
+A NestJS-based REST API for managing users and tasks with role-based access control, JWT authentication, Redis caching, and BullMQ background job processing.
 
 ## Core Features
 
@@ -13,6 +13,19 @@ A NestJS-based REST API for managing users and tasks with role-based access cont
 - **Caching** - Redis-based caching with TTL support via @nestjs/cache-manager
 - **Data Validation** - Request DTOs with class-validator for input validation
 - **Database** - PostgreSQL with Prisma ORM and automatic migrations
+- **Background Processing** - BullMQ-powered job queues for welcome emails on registration and task reminders 1 hour before due date
+- **Notifications** - In-app notification system for task reminders with read/delete management
+- **Containerization** - Docker and Docker Compose setup for Redis with environment-based configuration
+
+## Tech Stack
+
+- **Runtime** - Node.js with NestJS framework
+- **Language** - TypeScript
+- **Database** - PostgreSQL (Neon) with Prisma ORM
+- **Cache & Queue** - Redis via Docker, @nestjs/cache-manager, BullMQ
+- **Auth** - JWT with Passport.js
+- **Email** - Resend API
+- **Containerization** - Docker & Docker Compose
 
 ## Project Setup
 
@@ -20,32 +33,69 @@ A NestJS-based REST API for managing users and tasks with role-based access cont
 npm install
 ```
 
-## Compile and Run the Project
+## Environment Configuration
+
+Create a `.env` file in the `backend/` directory (see `.env.example`):
+
+```env
+# DATABASE CONFIG
+DATABASE_URL="your_database_url"
+
+# AUTHENTICATION CONFIG
+JWT_SECRET="your_jwt_secret_key"
+ROLES_KEY="your_roles_key"
+
+# REDIS CONFIG
+REDIS_HOST=localhost   # use "redis" when running via Docker Compose
+REDIS_PORT=6379
+REDIS_TTL=60000
+
+# RESEND EMAIL
+RESEND_API_KEY="your_resend_api_key"
+
+# SYSTEM LISTENS TO
+PORT=3000
+```
+
+## Running the App
 
 ```bash
-# development
-npm run start
-
 # development with watch mode
 npm run start:dev
 
-# debug mode with watch
+# debug mode
 npm run start:debug
 
-# production mode
+# production
 npm run start:prod
+```
 
-# build
-npm run build
+## Docker Setup
+
+Redis is containerized via Docker Compose. To start Redis only (for local development):
+
+```bash
+docker compose up -d redis
+```
+
+> **Note:** When running locally with `npm run start:dev`, set `REDIS_HOST=localhost` in your `.env`.
+> When running the full stack via Docker Compose, set `REDIS_HOST=redis`.
+
+```bash
+# To run the full stack:
+docker compose up -d --build
+
+# To remove the container:
+docker compose down
 ```
 
 ## Additional Commands
 
 ```bash
-# Code formatting
+# Format code
 npm run format
 
-# Linting
+# Lint
 npm run lint
 
 # Tests
@@ -53,73 +103,85 @@ npm run test
 npm run test:watch
 npm run test:cov
 npm run test:e2e
-```
 
-## Environment Configuration
-
-Create a `.env` file in the `backend/` directory:
-
-```
-PORT=3000
-DATABASE_URL=postgresql://user:password@localhost:5432/taskdb
-JWT_SECRET=your_jwt_secret_key
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_TTL=3600
-ROLES_KEY=roles
-```
-
-## Docker Setup
-
-The project includes Redis via Docker Compose. Start Redis:
-
-```bash
-docker-compose up -d
+# Prisma
+npx prisma migrate deploy
+npx prisma generate
+npx prisma studio
 ```
 
 ## API Endpoints
 
 ### Authentication
 
-- `POST /auth/register` - Register a new user
-- `POST /auth/login` - Login and receive JWT token
-- `GET /auth/token-info` - Get current user info (requires JWT)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/register` | Register a new user (triggers welcome email) |
+| POST | `/auth/login` | Login and receive JWT token |
+| GET | `/auth/token-info` | Get current user info (requires JWT) |
 
-### Users (Admin only, requires JWT)
+### Users *(Admin only — requires JWT)*
 
-- `POST /users` - Create a new user
-- `GET /users` - List all users (supports filtering by role, search by email, pagination)
-- `GET /users/:id` - Get a specific user
-- `PATCH /users/:id` - Update a user
-- `DELETE /users/:id` - Delete a user
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/users` | Create a new user |
+| GET | `/users` | List all users (filter by role, search by email, pagination) |
+| GET | `/users/:id` | Get a specific user |
+| PATCH | `/users/:id` | Update a user |
+| DELETE | `/users/:id` | Delete a user |
 
-### Tasks (Requires JWT)
+### Tasks *(Requires JWT)*
 
-- `POST /tasks` - Create a new task
-- `GET /tasks` - List user's tasks (supports filtering by priority/status, search by title, pagination)
-- `GET /tasks/:id` - Get a specific task
-- `PATCH /tasks/:id` - Update a task
-- `DELETE /tasks/:id` - Delete a task
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/tasks` | Create a new task |
+| GET | `/tasks` | List user's tasks (filter by priority/status, search by title, pagination) |
+| GET | `/tasks/:id` | Get a specific task |
+| PATCH | `/tasks/:id` | Update a task |
+| DELETE | `/tasks/:id` | Delete a task |
+
+### Notifications *(Requires JWT)*
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/notifications/send-reminder` | Manually create a notification |
+| GET | `/notifications` | List user's notifications |
+| PATCH | `/notifications/:id/read` | Mark a notification as read |
+| DELETE | `/notifications/:id` | Delete a notification |
 
 ## Data Models
 
 ### User
-- `id` (UUID) - Primary key
-- `email` (unique) - User email
-- `password` - Hashed password
-- `name` (optional) - User's name
-- `role` - USER or ADMIN
-- `createdAt` - Timestamp
-- `updatedAt` - Timestamp
-- `tasks` - Relation to user's tasks
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Primary key |
+| `email` | String (unique) | User email |
+| `password` | String | Hashed password |
+| `name` | String? | Optional display name |
+| `role` | Enum | `USER` or `ADMIN` |
+| `createdAt` | DateTime | Created timestamp |
+| `updatedAt` | DateTime | Updated timestamp |
 
 ### Task
-- `id` (auto-increment) - Primary key
-- `title` - Task title
-- `description` (optional) - Task description
-- `status` - PENDING, IN_PROGRESS, or COMPLETED
-- `priority` - LOW, MEDIUM, or HIGH
-- `dueDate` (optional) - Due date
-- `userId` - Foreign key to User
-- `createdAt` - Timestamp
-- `updatedAt` - Timestamp
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | Int | Primary key (auto-increment) |
+| `title` | String | Task title |
+| `description` | String? | Optional description |
+| `status` | Enum | `PENDING`, `IN_PROGRESS`, or `COMPLETED` |
+| `priority` | Enum | `LOW`, `MEDIUM`, or `HIGH` |
+| `dueDate` | DateTime? | Optional due date |
+| `userId` | String | Foreign key to User |
+| `createdAt` | DateTime | Created timestamp |
+| `updatedAt` | DateTime | Updated timestamp |
+
+### Notification
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | Int | Primary key (auto-increment) |
+| `title` | String | Notification title |
+| `dueDate` | DateTime | Task due date |
+| `userId` | String | Foreign key to User |
+| `taskId` | Int | Foreign key to Task |
+| `isRead` | Boolean | Read status |
+| `createdAt` | DateTime | Created timestamp |
