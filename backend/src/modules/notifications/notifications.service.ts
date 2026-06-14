@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { SendReminderDto } from './dto/send-reminder.dto';
 import { DatabaseService } from 'src/database/database.service';
 
@@ -73,5 +73,11 @@ export class NotificationsService {
             this.logger.error(`Failed to mark notification as read: ${message}`);
             throw error;
         }
+    }
+
+    async deleteNotification(notifId: number) {
+        await this.databaseService.notification.delete({
+            where: { id: notifId }
+        })
     }
 }

@@ -9,6 +9,8 @@ services:
       - '${PORT:-3000}:3000'
     env_file:
       - ./backend/.env
+    environment:
+      - REDIS_HOST=redis 
     depends_on:
       - redis
 

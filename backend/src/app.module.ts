@@ -32,7 +32,7 @@ import { WelcomeEmailModule } from './modules/welcome-email/welcome-email.module
     }),
     BullModule.forRoot({
       connection: {
-        host: process.env.REDIS_HOST ?? 'localhost',
+        host: process.env.REDIS_HOST ?? 'redis',
         port: parseInt(process.env.REDIS_PORT ?? '6379')
       },
       defaultJobOptions: { attempts: 3 }
