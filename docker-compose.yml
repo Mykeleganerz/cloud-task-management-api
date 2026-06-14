@@ -9,14 +9,6 @@ services:
       - '${PORT:-3000}:3000'
     env_file:
       - ./backend/.env
-    environment:
-      - REDIS_HOST=${REDIS_HOST:-redis}
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_TTL=${REDIS_TTL}
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-      - ROLES_KEY=${ROLES_KEY}
-      - RESEND_API_KEY=${RESEND_API_KEY}
     depends_on:
       - redis
 
