@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { UsersService } from 'src/modules/users/users.service';
 import { CredentialsInputDto } from './dto/auth-dto';
-import { Role } from 'generated/prisma';
+import { Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register-dto';

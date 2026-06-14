@@ -3,7 +3,7 @@ import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
-import { Priority, Status } from 'generated/prisma/client';
+import { Priority, Status } from '@prisma/client';
 import { TaskRemindersService } from 'src/modules/task-reminders/task-reminders.service';
 
 @Controller('tasks')

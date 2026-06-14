@@ -6,7 +6,7 @@ import { Resend } from "resend";
 @Processor('welcome-email-queue')
 export class WelcomeEmailProcessor extends WorkerHost {
     private readonly logger = new Logger(WelcomeEmailProcessor.name);
-    private resend = new Resend(`${process.env.API_KEY}`);
+    private resend = new Resend(`${process.env.RESEND_API_KEY}`);
 
     async process(job: Job) {
         try {
