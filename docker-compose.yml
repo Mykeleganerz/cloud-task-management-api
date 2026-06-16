@@ -7,6 +7,10 @@ services:
     restart: always
     ports:
       - '${PORT:-3000}:3000'
+    develop:
+      watch:
+        - action: rebuild
+          path: ./backend
     env_file:
       - ./backend/.env
     environment:
