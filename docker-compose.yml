@@ -22,8 +22,6 @@ services:
     image: redis:alpine
     container_name: cloud-task-management-api-redis
     restart: always
-    ports:
-      - '6379:6379'
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
