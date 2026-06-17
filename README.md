@@ -149,6 +149,324 @@ npx prisma studio
 | PATCH | `/notifications/:id/read` | Mark a notification as read |
 | DELETE | `/notifications/:id` | Delete a notification |
 
+## Request/Response Examples
+
+### POST /auth/register – Register a New User
+
+**Request Body:**
+```json
+{
+  "email": "mykel@example.com",
+  "password": "securepassword123",
+  "name": "Mykel"
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": "a3f1c820-9b2d-4e77-b501-2f3a9d8c1e44",
+  "email": "mykel@example.com",
+  "name": "Mykel",
+  "role": "USER",
+  "createdAt": "2026-06-17T10:00:00.000Z",
+  "updatedAt": "2026-06-17T10:00:00.000Z"
+}
+```
+
+---
+
+### POST /auth/login – Login
+
+**Request Body:**
+```json
+{
+  "email": "mykel@example.com",
+  "password": "securepassword123"
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": "a3f1c820-9b2d-4e77-b501-2f3a9d8c1e44",
+  "email": "mykel@example.com",
+  "role": "USER",
+
+}
+```
+
+---
+
+### GET /auth/token-info – Get Current User Info
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response (200):**
+```json
+{
+  "id": "a3f1c820-9b2d-4e77-b501-2f3a9d8c1e44",
+  "email": "mykel@example.com",
+  "name": "Mykel",
+  "role": "USER",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI3MDM2OTY3LTk5YmUtNGRiZC05YTZhLTgzYTdjNzA1ODk2NyIsImVtYWlsIjoiam9ubmVsQGdtYWlsLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MTY4NTI3NSwiZXhwIjoxNzgxNzcxNjc1fQ.pz0vTEf6DsCDtvCXtq8cBnuF6jscvey3LaIU8Z5AzvE"
+}
+```
+
+---
+
+### POST /tasks – Create a Task
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Request Body:**
+```json
+{
+  "title": "Finish backend API",
+  "description": "Complete all remaining endpoints",
+  "status": "PENDING",
+  "priority": "HIGH",
+  "dueDate": "2026-06-20T09:00:00.000Z"
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": 1,
+  "title": "Finish backend API",
+  "description": "Complete all remaining endpoints",
+  "status": "PENDING",
+  "priority": "HIGH",
+  "dueDate": "2026-06-20T09:00:00.000Z",
+  "userId": "a3f1c820-9b2d-4e77-b501-2f3a9d8c1e44",
+  "createdAt": "2026-06-17T10:05:00.000Z",
+  "updatedAt": "2026-06-17T10:05:00.000Z"
+}
+```
+
+---
+
+### GET /tasks – List Tasks (with filter + pagination)
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Query Params:**
+```
+GET /tasks?priority=HIGH&status=PENDING&search=backend&skip=0&take=10
+```
+
+**Response (200):**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Finish backend API",
+      "description": "Complete all remaining endpoints",
+      "status": "PENDING",
+      "priority": "HIGH",
+      "dueDate": "2026-06-20T09:00:00.000Z",
+      "userId": "a3f1c820-9b2d-4e77-b501-2f3a9d8c1e44",
+      "createdAt": "2026-06-17T10:05:00.000Z",
+      "updatedAt": "2026-06-17T10:05:00.000Z"
+    }
+  ],
+  "total": 1,
+  "skip": 0,
+  "take": 10
+}
+```
+
+---
+
+### PATCH /tasks/:id – Update a Task
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Request Body:**
+```json
+{
+  "status": "IN_PROGRESS",
+  "priority": "MEDIUM"
+}
+```
+
+**Response (200):**
+```json
+{
+  "id": 1,
+  "title": "Finish backend API",
+  "description": "Complete all remaining endpoints",
+  "status": "IN_PROGRESS",
+  "priority": "MEDIUM",
+  "dueDate": "2026-06-20T09:00:00.000Z",
+  "userId": "a3f1c820-9b2d-4e77-b501-2f3a9d8c1e44",
+  "createdAt": "2026-06-17T10:05:00.000Z",
+  "updatedAt": "2026-06-17T11:30:00.000Z"
+}
+```
+
+---
+
+### GET /users – List All Users (Admin only)
+
+**Headers:**
+```
+Authorization: Bearer <admin_token>
+```
+
+**Query Params:**
+```
+GET /users?role=USER&search=mykel&skip=0&take=10
+```
+
+**Response (200):**
+```json
+{
+  "data": [
+    {
+      "id": "a3f1c820-9b2d-4e77-b501-2f3a9d8c1e44",
+      "email": "mykel@example.com",
+      "name": "Mykel",
+      "role": "USER",
+      "createdAt": "2026-06-17T10:00:00.000Z",
+      "updatedAt": "2026-06-17T10:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "skip": 0,
+  "take": 10
+}
+```
+
+---
+
+### PATCH /users/:id – Update a User (Admin only)
+
+**Headers:**
+```
+Authorization: Bearer <admin_token>
+```
+
+**Request Body:**
+```json
+{
+  "name": "Mykel Updated",
+  "role": "ADMIN"
+}
+```
+
+**Response (200):**
+```json
+{
+  "id": "a3f1c820-9b2d-4e77-b501-2f3a9d8c1e44",
+  "email": "mykel@example.com",
+  "name": "Mykel Updated",
+  "role": "ADMIN",
+  "createdAt": "2026-06-17T10:00:00.000Z",
+  "updatedAt": "2026-06-17T12:00:00.000Z"
+}
+```
+
+---
+
+### GET /notifications – List Notifications
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response (200):**
+```json
+[
+  {
+    "id": 1,
+    "title": "Task Reminder: Finish backend API",
+    "dueDate": "2026-06-20T09:00:00.000Z",
+    "userId": "a3f1c820-9b2d-4e77-b501-2f3a9d8c1e44",
+    "taskId": 1,
+    "isRead": false,
+    "createdAt": "2026-06-20T08:00:00.000Z"
+  }
+]
+```
+
+---
+
+### PATCH /notifications/:id/read – Mark Notification as Read
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response (200):**
+```json
+{
+  "id": 1,
+  "title": "Task Reminder: Finish backend API",
+  "dueDate": "2026-06-20T09:00:00.000Z",
+  "userId": "a3f1c820-9b2d-4e77-b501-2f3a9d8c1e44",
+  "taskId": 1,
+  "isRead": true,
+  "createdAt": "2026-06-20T08:00:00.000Z"
+}
+```
+
+---
+
+### Error Responses
+
+**401 Unauthorized** – Missing or invalid token:
+```json
+{
+  "statusCode": 401,
+  "message": "Unauthorized"
+}
+```
+
+**403 Forbidden** – Insufficient role:
+```json
+{
+  "statusCode": 403,
+  "message": "Forbidden resource"
+}
+```
+
+**404 Not Found** – Resource doesn't exist:
+```json
+{
+  "statusCode": 404,
+  "message": "Task not found"
+}
+```
+
+**400 Bad Request** – Validation error:
+```json
+{
+  "statusCode": 400,
+  "message": [
+    "email must be an email",
+    "password must be longer than or equal to 6 characters"
+  ],
+  "error": "Bad Request"
+}
+```
+
 ## Data Models
 
 ### User
@@ -185,3 +503,9 @@ npx prisma studio
 | `taskId` | Int | Foreign key to Task |
 | `isRead` | Boolean | Read status |
 | `createdAt` | DateTime | Created timestamp |
+
+## Architecture Diagram
+
+![Architecture Diagram](docs/images/architecture-diagram.svg)
+
+## Video Demo
