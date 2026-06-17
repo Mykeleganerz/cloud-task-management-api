@@ -2,6 +2,20 @@
 
 A NestJS-based REST API for managing users and tasks with role-based access control, JWT authentication, Redis caching, and BullMQ background job processing.
 
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat&logo=nestjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-black?style=flat&logo=jsonwebtokens)
+
+> As a backend developer, i didn't just build this to check a box — I built it because I wanted to understand 
+> what separates a working API from a production-ready one. That meant digging into 
+> BullMQ job queues for async email delivery and scheduled task reminders, layering 
+> Redis caching on top of Prisma queries, enforcing ownership and roles through 
+> JWT guards, and wiring everything together in a clean NestJS module architecture. 
+> This is the kind of backend I'd be proud to hand off to a team.
+
 ## Core Features
 
 - **User Authentication** - Register and login with JWT-based token authentication
