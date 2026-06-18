@@ -4,17 +4,14 @@ A NestJS-based REST API for managing users and tasks with role-based access cont
 
 ![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat&logo=nestjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=flat&logo=amazon-aws&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-black?style=flat&logo=jsonwebtokens)
 
-> As a backend developer, i didn't just build this to check a box — I built it because I wanted to understand 
-> what separates a working API from a production-ready one. That meant digging into 
-> BullMQ job queues for async email delivery and scheduled task reminders, layering 
-> Redis caching on top of Prisma queries, enforcing ownership and roles through 
-> JWT guards, and wiring everything together in a clean NestJS module architecture. 
-> This is the kind of backend I'd be proud to hand off to a team.
+> I didn’t just build this API to write code—I built it to understand production engineering at scale. This project is the result of digging deep into modern backend bottlenecks and solving them systematically. From scaling data retrieval with Redis caching and managing async tasks with BullMQ queues, to configuring robust JWT guards and deploying on AWS EC2 via Nginx, every architectural decision was made with production reliability in mind. It's a clean, modular NestJS ecosystem built to enterprise standards, and exactly the kind of backend engineering I love bringing to a team.
 
 ## Core Features
 
@@ -30,6 +27,7 @@ A NestJS-based REST API for managing users and tasks with role-based access cont
 - **Background Processing** - BullMQ-powered job queues for welcome emails on registration and task reminders 1 hour before due date
 - **Notifications** - In-app notification system for task reminders with read/delete management
 - **Containerization** - Docker and Docker Compose setup for Redis with environment-based configuration
+- **Production Deployment** - Hosted on an AWS EC2 instance using an Nginx reverse proxy for secure traffic routing and port forwarding
 
 ## Tech Stack
 
@@ -39,6 +37,7 @@ A NestJS-based REST API for managing users and tasks with role-based access cont
 - **Cache & Queue** - Redis via Docker, @nestjs/cache-manager, BullMQ
 - **Auth** - JWT with Passport.js
 - **Email** - Resend API
+- **Deployment & Infrastructure** - AWS EC2, Nginx (Reverse Proxy)
 - **Containerization** - Docker & Docker Compose
 
 ## Project Setup
@@ -70,18 +69,26 @@ RESEND_API_KEY="your_resend_api_key"
 # SYSTEM LISTENS TO
 PORT=3000
 ```
-
 ## Running the App
 
+### Local Development
 ```bash
 # development with watch mode
 npm run start:dev
 
 # debug mode
 npm run start:debug
+```
 
-# production
-npm run start:prod
+### Production Deployment (AWS EC2)
+> **Note:** Before running the production build, ensure your database schema is up to date and the Prisma client is generated:
+
+```bash
+# 1. Safely apply pending database migrations using Prisma
+npx prisma migrate deploy
+
+# 2. Build and run the system container stack in the background
+docker compose up -d --build
 ```
 
 ## Docker Setup
@@ -102,6 +109,25 @@ docker compose up -d --build
 # To remove the container:
 docker compose down
 ```
+## Production Deployment & Nginx Configuration
+The API is deployed on an AWS EC2 instance. Traffic entering through port 80 (HTTP) or 443 (HTTPS) is handled by Nginx, which acts as a reverse proxy, forwarding requests securely to the NestJS application running on port 3000.
+```nginx
+server {
+    listen 80;
+    server_name your_domain_or_ec2_ip;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
 
 ## Additional Commands
 
@@ -119,6 +145,7 @@ npm run test:cov
 npm run test:e2e
 
 # Prisma
+npx prisma migrate dev --name <name>
 npx prisma migrate deploy
 npx prisma generate
 npx prisma studio
