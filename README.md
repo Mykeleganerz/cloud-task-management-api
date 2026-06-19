@@ -1,6 +1,6 @@
 # Cloud Task Management API
 
-A NestJS-based REST API for managing users and tasks with role-based access control, JWT authentication, Redis caching, and BullMQ background job processing.
+A NestJS-based REST API for managing users and tasks with role-based access control, JWT authentication, Redis caching, BullMQ background job processing and deployed to AWS EC2 behind Nginx.
 
 ![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat&logo=nestjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
