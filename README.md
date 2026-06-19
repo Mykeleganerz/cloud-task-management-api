@@ -232,7 +232,6 @@ npx prisma studio
 {
   "id": "a3f1c820-9b2d-4e77-b501-2f3a9d8c1e44",
   "email": "mykel@example.com",
-  "name": "Mykel",
   "role": "USER",
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI3MDM2OTY3LTk5YmUtNGRiZC05YTZhLTgzYTdjNzA1ODk2NyIsImVtYWlsIjoiam9ubmVsQGdtYWlsLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MTY4NTI3NSwiZXhwIjoxNzgxNzcxNjc1fQ.pz0vTEf6DsCDtvCXtq8cBnuF6jscvey3LaIU8Z5AzvE"
 }
@@ -551,3 +550,5 @@ Authorization: Bearer <token>
 ![Architecture Diagram](docs/images/architecture-diagram.svg)
 
 ## Video Demo
+
+[![Watch the demo](https://img.youtube.com/vi/68HLsoONoyQ/maxresdefault.jpg)](https://youtu.be/68HLsoONoyQ)
