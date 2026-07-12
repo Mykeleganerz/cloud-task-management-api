@@ -11,6 +11,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { TaskRemindersModule } from './modules/task-reminders/task-reminders.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { WelcomeEmailModule } from './modules/welcome-email/welcome-email.module';
+import { SwaggerModule } from '@nestjs/swagger';
 
 @Module({
   imports: [
@@ -37,8 +38,6 @@ import { WelcomeEmailModule } from './modules/welcome-email/welcome-email.module
       },
       defaultJobOptions: { attempts: 3 }
     }),
-
-
   ],
   controllers: [AppController],
   providers: [AppService],
