@@ -26,6 +26,7 @@ A NestJS-based REST API for managing users and tasks with role-based access cont
 - **Database** - PostgreSQL with Prisma ORM and automatic migrations
 - **Background Processing** - BullMQ-powered job queues for welcome emails on registration and task reminders 1 hour before due date
 - **Notifications** - In-app notification system for task reminders with read/delete management
+- **API Documentation** - Interactive Swagger (OpenAPI) documentation for exploring and testing API endpoints.
 - **Containerization** - Docker and Docker Compose setup for Redis with environment-based configuration
 - **Production Deployment** - Hosted on an AWS EC2 instance using an Nginx reverse proxy for secure traffic routing and port forwarding
 
@@ -37,12 +38,14 @@ A NestJS-based REST API for managing users and tasks with role-based access cont
 - **Cache & Queue** - Redis via Docker, @nestjs/cache-manager, BullMQ
 - **Auth** - JWT with Passport.js
 - **Email** - Resend API
+- **API Documentation** - Swagger (OpenAPI)
 - **Deployment & Infrastructure** - AWS EC2, Nginx (Reverse Proxy)
 - **Containerization** - Docker & Docker Compose
 
 ## Project Setup
 
 ```bash
+cd backend/
 npm install
 ```
 
@@ -74,9 +77,11 @@ PORT=3000
 ### Local Development
 ```bash
 # development with watch mode
+cd backend/
 npm run start:dev
 
 # debug mode
+cd backend/
 npm run start:debug
 ```
 
@@ -544,6 +549,14 @@ Authorization: Bearer <token>
 | `taskId` | Int | Foreign key to Task |
 | `isRead` | Boolean | Read status |
 | `createdAt` | DateTime | Created timestamp |
+
+## API Documentation (Swagger)
+This project uses Swagger for interactive API documentation, allowing you to explore and test all endpoints directly from your browser.
+
+Once the application is running, access the interactive Swagger UI at:
+```http://localhost:3000/api```
+
+![API Docs](docs/images/api-docs.png)
 
 ## Architecture Diagram
 
