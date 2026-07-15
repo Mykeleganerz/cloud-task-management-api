@@ -13,6 +13,20 @@ A NestJS-based REST API for managing users and tasks with role-based access cont
 
 > I didn’t just build this API to write code—I built it to understand production engineering at scale. This project is the result of digging deep into modern backend bottlenecks and solving them systematically. From scaling data retrieval with Redis caching and managing async tasks with BullMQ queues, to configuring robust JWT guards and deploying on AWS EC2 via Nginx, every architectural decision was made with production reliability in mind. It's a clean, modular NestJS ecosystem built to enterprise standards, and exactly the kind of backend engineering I love bringing to a team.
 
+## Table of Contents
+- [Core Features](#core-features)
+- [Tech Stack](#tech-stack)
+- [Project Setup](#project-setup)
+- [Environment Configuration](#environment-configuration)
+- [Running the App](#running-the-app)
+- [Docker Setup](#docker-setup)
+- [Production Deployment & Nginx](#production-deployment--nginx-configuration)
+- [API Endpoints](#api-endpoints)
+- [Data Models](#data-models)
+- [Swagger API Docs](#api-documentation-swagger)
+- [Architecture Diagram](#architecture-diagram)
+- [Video Demo](#video-demo)
+
 ## Core Features
 
 - **User Authentication** - Register and login with JWT-based token authentication
@@ -49,6 +63,8 @@ cd backend/
 npm install
 ```
 
+[Back to Top](#table-of-contents)
+
 ## Environment Configuration
 
 Create a `.env` file in the `backend/` directory (see `.env.example`):
@@ -72,6 +88,9 @@ RESEND_API_KEY="your_resend_api_key"
 # SYSTEM LISTENS TO
 PORT=3000
 ```
+
+[Back to Top](#table-of-contents)
+
 ## Running the App
 
 ### Local Development
@@ -104,6 +123,8 @@ Redis is containerized via Docker Compose. To start Redis only (for local develo
 docker compose up -d redis
 ```
 
+[Back to Top](#table-of-contents)
+
 > **Note:** When running locally with `npm run start:dev`, set `REDIS_HOST=localhost` in your `.env`.
 > When running the full stack via Docker Compose, set `REDIS_HOST=redis`.
 
@@ -134,6 +155,8 @@ server {
 }
 ```
 
+[Back to Top](#table-of-contents)
+
 ## Additional Commands
 
 ```bash
@@ -155,6 +178,8 @@ npx prisma migrate deploy
 npx prisma generate
 npx prisma studio
 ```
+
+[Back to Top](#table-of-contents)
 
 ## API Endpoints
 
@@ -194,6 +219,8 @@ npx prisma studio
 | GET | `/notifications` | List user's notifications |
 | PATCH | `/notifications/:id/read` | Mark a notification as read |
 | DELETE | `/notifications/:id` | Delete a notification |
+
+[Back to Top](#table-of-contents)
 
 ## Request/Response Examples
 
@@ -513,6 +540,8 @@ Authorization: Bearer <token>
 }
 ```
 
+[Back to Top](#table-of-contents)
+
 ## Data Models
 
 ### User
@@ -550,6 +579,8 @@ Authorization: Bearer <token>
 | `isRead` | Boolean | Read status |
 | `createdAt` | DateTime | Created timestamp |
 
+[Back to Top](#table-of-contents)
+
 ## API Documentation (Swagger)
 This project uses Swagger for interactive API documentation, allowing you to explore and test all endpoints directly from your browser.
 
@@ -565,3 +596,5 @@ Once the application is running, access the interactive Swagger UI at:
 ## Video Demo
 
 [![Watch the demo](https://img.youtube.com/vi/68HLsoONoyQ/maxresdefault.jpg)](https://youtu.be/68HLsoONoyQ)
+
+[Back to Top](#table-of-contents)
