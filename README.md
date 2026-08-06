@@ -590,6 +590,8 @@ Once the application is running, access the interactive Swagger UI at:
 
 ![API Docs](docs/images/api-docs.png)
 
+[Back to Top](#table-of-contents)
+
 ## Architecture Diagram
 
 ![Architecture Diagram](docs/images/architecture-diagram.svg)
